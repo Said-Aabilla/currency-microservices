@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.mydomain</groupId>
-    <artifactId>centrelized-config-server</artifactId>
+    <artifactId>centralized-config-server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>centrelized-config-server</name>
-    <description>centrelized-config-server</description>
+    <name>centralized-config-server</name>
+    <description>centralized-config-server</description>
     <url/>
     <licenses>
         <license/>
