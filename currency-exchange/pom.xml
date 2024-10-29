@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.mydomain</groupId>
-    <artifactId>currency-exchange</artifactId>
+    <artifactId>currency-exchange-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>currency-exchange</name>
-    <description>currency-exchange</description>
+    <name>currency-exchange-service</name>
+    <description>currency-exchange-service</description>
     <url/>
     <licenses>
         <license/>
