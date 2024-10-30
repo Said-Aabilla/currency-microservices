@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 
 @RestController
-public class CurrencyExchangeCntroller {
+public class CurrencyExchangeController {
 
 
 
