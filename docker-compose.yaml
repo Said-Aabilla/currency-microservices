@@ -12,6 +12,33 @@ services:
       - naming-registry-service
     environment:
       EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-registry-service:8761/eureka
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin-service:9411/api/v2/spans
+
+  currency-conversion-service:
+    image: said160/ms-currency-conversion-service:0.0.1-SNAPSHOT
+    mem_reservation: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-registry-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-registry-service:8761/eureka
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin-service:9411/api/v2/spans
+
+  api-gateway-service:
+    image: said160/ms-api-gateway-service:0.0.1-SNAPSHOT
+    mem_reservation: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-registry-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-registry-service:8761/eureka
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin-service:9411/api/v2/spans
 
 
   naming-registry-service:
@@ -21,5 +48,15 @@ services:
       - "8761:8761"
     networks:
       - currency-network
+
+  zipkin-service:
+    image: openzipkin/zipkin
+    mem_reservation: 300m
+    ports:
+      - "9411:9411"
+    networks:
+      - currency-network
+    restart: always
+
 networks:
   currency-network:
