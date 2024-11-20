@@ -8,5 +8,18 @@ services:
       - "8000:8000"
     networks:
       - currency-network
+    depends_on:
+      - naming-registry-service
+    environment:
+      EUREKA.CLIENT.SERVICEURL.DEFAULTZONE: http://naming-registry-service:8761/eureka
+
+
+  naming-registry-service:
+    image: said160/ms-naming-registry-service:0.0.1-SNAPSHOT
+    mem_reservation: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network
 networks:
   currency-network:
