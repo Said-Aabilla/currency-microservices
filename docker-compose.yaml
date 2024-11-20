@@ -6,3 +6,7 @@ services:
     mem_reservation: 700m
     ports:
       - "8000:8000"
+    networks:
+      - currency-network
+networks:
+  currency-network:
