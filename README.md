@@ -1,42 +1,15 @@
-## URLs
-
-### Limits Service
-- http://localhost:8080/limits
-
-### Cloud Config Server
-- http://localhost:8888/limits-service/default
-- http://localhost:8888/limits-service/dev
-
-### Currency Exchange Service
-- http://localhost:8000/currency-exchange/from/USD/to/INR
-
-### Currency Conversion Service
-- http://localhost:8100/currency-conversion/from/USD/to/INR/quantity/10
-- http://localhost:8100/currency-conversion-feign/from/USD/to/INR/quantity/10
-
-### Eureka
-- http://localhost:8761/
-
-### Spring Cloud Api Gateway
-
-Initial (default)
-- http://localhost:8765/CURRENCY-EXCHANGE/currency-exchange/from/USD/to/INR
-- http://localhost:8765/CURRENCY-CONVERSION/currency-conversion/from/USD/to/INR/quantity/10
-- http://localhost:8765/CURRENCY-CONVERSION/currency-conversion-feign/from/USD/to/INR/quantity/10
-
-Final (after configuring the routing in ```ApiGatewayConfig```)
+## Final URLs (after configuring the routing in ```ApiGatewayConfig```)
 - http://localhost:8765/currency-exchange/from/USD/to/INR
 - http://localhost:8765/currency-conversion/from/USD/to/INR/quantity/10
-- http://localhost:8765/currency-conversion-feign/from/USD/to/INR/quantity/10
 - http://localhost:8765/currency-conversion-new/from/USD/to/INR/quantity/10
 
 
-# Steps to Build and Push the Docker Image Locally
+# Steps to Build and Push the Docker Image of each Service Locally
 
 ## 1. Build the Docker Image Using Maven
 Since you have a `pom.xml` file with the `spring-boot-maven-plugin` configured:  
 ``` xml
-<build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -90,3 +63,36 @@ Once the image is built locally, start your application using docker-compose:
 ````bash
 docker-compose up
 ````
+
+## 5. Push The image to Docker Hub
+- First make sure you are logged in
+```bash
+docker login
+```
+
+- Tag the image (if needed)
+```bash
+docker tag said160/ms-currency-exchange-service:0.0.1-SNAPSHOT said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
+```
+
+- Push the image to Docker Hub
+```bash
+docker push said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
+```
+- Verify the image on Docker Hub
+- Optional: Pull the image to test
+``` bash
+docker pull said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
+ ```
+
+
+
+
+## Important URLs
+### Currency Exchange Service
+- http://localhost:8000/currency-exchange/from/USD/to/INR
+### Currency Conversion Service
+- http://localhost:8100/currency-conversion/from/USD/to/INR/quantity/10
+- http://localhost:8100/currency-conversion-feign/from/USD/to/INR/quantity/10
+### Eureka
+- http://localhost:8761/
