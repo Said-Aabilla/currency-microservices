@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: currency-exchange-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: currency-exchange-service
+  template:
+    metadata:
+      labels:
+        app: currency-exchange-service
+    spec:
+      containers:
+        - name: currency-exchange-service
+          image: said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
+          resources:
+            requests:
+              memory: "700Mi"
+          ports:
+            - containerPort: 8000
+          env:
+            - name: EUREKA.CLIENT.SERVICEURL.DEFAULTZONE
+              value: "http://naming-registry-service:8761/eureka"
+            - name: MANAGEMENT.ZIPKIN.TRACING.ENDPOINT
+              value: "http://zipkin-service:9411/api/v2/spans"

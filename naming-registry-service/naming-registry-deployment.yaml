@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: naming-registry-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: naming-registry-service
+  template:
+    metadata:
+      labels:
+        app: naming-registry-service
+    spec:
+      containers:
+        - name: naming-registry-service
+          image: said160/ms-naming-registry-service:0.0.1-SNAPSHOT
+          resources:
+            requests:
+              memory: "700Mi"
+          ports:
+            - containerPort: 8761
