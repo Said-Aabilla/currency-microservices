@@ -116,7 +116,7 @@ docker pull said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
 
 ### Step 2: Write Kubernetes Deployment and Service YAML Files
 
-1. Create a `currency-exchange-deployment.yaml` file:
+1. Create a `currency-exchange-deployment.yaml` and  `currency-exchange-service.yaml` files:
 
    ``` yaml
    apiVersion: apps/v1
@@ -138,7 +138,9 @@ docker pull said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
    image: said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
    ports:
    - containerPort: 8000
+   ```
    ---
+   ``` yaml
    apiVersion: v1
    kind: Service
    metadata:
