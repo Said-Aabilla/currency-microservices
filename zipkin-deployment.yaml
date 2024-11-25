@@ -20,3 +20,6 @@ spec:
               memory: "300Mi"
           ports:
             - containerPort: 9411
+          env:
+            - name: EUREKA.CLIENT.SERVICEURL.DEFAULTZONE
+              value: "http://naming-registry-service:8761/eureka"

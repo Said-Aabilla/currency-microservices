@@ -85,79 +85,172 @@ docker push said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
 docker pull said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
  ```
 
+# Deploying Microservices on Kubernetes in Google Cloud
 
-# Key Concepts of Kubernetes
+## Prerequisites
+1. A Google Cloud Platform (GCP) account.
+2. A Kubernetes cluster created in GCP.
+3. `kubectl` and `gcloud` CLI tools installed and configured.
 
-## 1. Cluster
-A **cluster** is the foundation of Kubernetes and consists of:
-- **Master Node (Control Plane):** Manages the cluster, schedules workloads, and maintains the desired state.
-- **Worker Nodes:** Run application containers.
+---
 
-## 2. Nodes
-A **node** is a machine (physical or virtual) in the cluster.
-Each node runs:
-- **Kubelet:** Communicates with the master node and ensures containers are running.
-- **Container Runtime:** E.g., Docker or containerd, which runs the actual containers.
-- **Kube Proxy:** Handles networking and load balancing.
+## Steps to Deploy
 
-## 3. Pods
-A **pod** is the smallest deployable unit in Kubernetes.
-A pod encapsulates:
-- One or more **containers**.
-- **Networking** (IP address shared among containers in the pod).
-- **Storage** (e.g., shared volumes).
+### Step 1: Configure Your Environment
+1. Authenticate with GCP:
+   ```bash
+   gcloud auth login
+   ```
 
-**Use Case:** Deploy tightly coupled containers, such as an app server and a log collector.
+2. Set the active project:
+   ```bash
+   gcloud config set project <your-project-id>
+   ```
 
-## 4. Services
-A **service** provides a stable network endpoint to expose pods to other pods or external users.
+3. Connect to the Kubernetes cluster:
+   ```bash
+   gcloud container clusters get-credentials <your-cluster-name> --zone <your-zone>
+   ```
 
-### Types:
-- **ClusterIP (default):** Exposes the service internally to the cluster.
-- **NodePort:** Exposes the service on each node’s IP and a static port.
-- **LoadBalancer:** Exposes the service externally using a cloud provider’s load balancer.
-- **ExternalName:** Maps a service to an external DNS name.
+---
 
-## 5. Deployments
-A **deployment** is a higher-level abstraction to manage pods and replicas.
+### Step 2: Write Kubernetes Deployment and Service YAML Files
 
-### Handles:
-- **Scaling** (e.g., increase or decrease replicas).
-- **Rollouts** (e.g., deploy new versions).
-- **Rollbacks** (revert to a previous state).
+1. Create a `currency-exchange-deployment.yaml` file:
 
-## 6. ReplicaSets
-Ensures a specified number of pod replicas are running at any given time.
-- **Deployments** use ReplicaSets to manage scaling and rolling updates.
+   ``` yaml
+   apiVersion: apps/v1
+   kind: Deployment
+   metadata:
+   name: currency-exchange-service
+   spec:
+   replicas: 2
+   selector:
+   matchLabels:
+   app: currency-exchange
+   template:
+   metadata:
+   labels:
+   app: currency-exchange
+   spec:
+   containers:
+   - name: currency-exchange
+   image: said160/ms-currency-exchange-service:0.0.1-SNAPSHOT
+   ports:
+   - containerPort: 8000
+   ---
+   apiVersion: v1
+   kind: Service
+   metadata:
+   name: currency-exchange-service
+   spec:
+   selector:
+   app: currency-exchange
+   ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+      type: ClusterIP
+   ```
 
-## 7. Namespaces
-**Namespaces** are used to divide cluster resources among multiple teams or projects.
+2. Similarly, create YAML files for `currency-conversion-service`, `naming-registry-service`, and `api-gateway-service`, modifying `ports` and `image` as required.
 
-### Default namespaces:
-- **default:** The default namespace for all objects.
-- **kube-system:** For Kubernetes system components.
-- **kube-public:** For public, cluster-wide resources.
+3. For `api-gateway-service`, set the service type to `LoadBalancer`:
 
-## 8. ConfigMaps and Secrets
-- **ConfigMaps:** Store configuration data as key-value pairs.
-- **Secrets:** Store sensitive data, like passwords or API keys, securely (base64 encoded).
+   ```yaml
+   apiVersion: v1
+   kind: Service
+   metadata:
+   name: api-gateway-service
+   spec:
+   selector:
+   app: api-gateway
+   ports:
+    - protocol: TCP
+      port: 8765
+      targetPort: 8765
+      type: LoadBalancer
+   ```
 
-## 9. Volumes
-Provide persistent or shared storage to pods.
+---
 
-### Types:
-- **emptyDir:** Temporary storage for the pod’s lifetime.
-- **hostPath:** Access to the host’s file system.
-- **PersistentVolume (PV) and PersistentVolumeClaim (PVC):** Manage long-term storage.
+### Step 3: Deploy Services to Kubernetes
 
-## 10. Ingress
-Manages external HTTP(S) access to services in the cluster.
+1. Deploy each service by applying the corresponding YAML files:
+   ```bash
+   kubectl apply -f currency-exchange-deployment.yaml
+   kubectl apply -f currency-conversion-deployment.yaml
+   kubectl apply -f naming-registry-deployment.yaml
+   kubectl apply -f api-gateway-deployment.yaml
+   ```
 
-### Provides:
-- **Routing rules**
-- **Load balancing**
-- **SSL termination**, etc.
+2. Verify deployments and services:
+   ```bash
+   kubectl get deployments
+   kubectl get services
+   ```
 
+---
+
+### Step 4: Validate Communication Between Services
+
+1. Identify a pod from the `currency-conversion-service`:
+   ```bash
+   kubectl get pods
+   ```
+
+2. Access the pod's shell:
+   ```bash
+   kubectl exec -it <pod-name-of-currency-conversion-service> -- /bin/sh
+   ```
+
+3. Inside the pod, validate communication with another service:
+   ```bash
+   wget -qO- http://currency-exchange-service:8000/currency-exchange/from/USD/to/EUR
+   ```
+
+---
+
+### Step 5: Access the API Gateway
+
+1. Get the external IP of the `api-gateway-service`:
+   ```bash
+   kubectl get services
+   ```
+
+2. Test access to the API Gateway:
+   ```bash
+   curl http://<external-ip>:8765/currency-conversion/from/USD/to/EUR/quantity/10
+   ```
+
+---
+
+### Step 6: Monitor and Manage Services
+
+1. View logs for a specific pod:
+   ```bash
+   kubectl logs <pod-name>
+   ```
+
+2. Scale a deployment as needed:
+   ```bash
+   kubectl scale deployment currency-exchange-service --replicas=3
+   ```
+
+---
+
+### Cleanup
+To delete all deployments and services:
+```bash
+kubectl delete -f currency-exchange-deployment.yaml
+kubectl delete -f currency-conversion-deployment.yaml
+kubectl delete -f naming-registry-deployment.yaml
+kubectl delete -f api-gateway-deployment.yaml
+```
+
+---
+
+You have successfully deployed and validated your microservices on Kubernetes in Google Cloud!
 
 
 ## Important URLs
